@@ -1,0 +1,50 @@
+[
+  {
+    "id": "cam_001",
+    "name": "Front Door",
+    "ip": "192.168.1.100",
+    "port": 554,
+    "username": "admin",
+    "password": "password123",
+    "rtspPath": "/Streaming/Channels/101",
+    "manufacturer": "hikvision",
+    "status": "active",
+    "createdAt": "2025-01-16T00:00:00.000Z"
+  },
+  {
+    "id": "cam_002",
+    "name": "Backyard",
+    "ip": "192.168.1.101",
+    "port": 554,
+    "username": "admin",
+    "password": "password123",
+    "rtspPath": "/cam/realmonitor?channel=1&subtype=0",
+    "manufacturer": "dahua",
+    "status": "active",
+    "createdAt": "2025-01-16T00:00:00.000Z"
+  },
+  {
+    "id": "cam_003",
+    "name": "Garage",
+    "ip": "192.168.1.102",
+    "port": 554,
+    "username": "admin",
+    "password": "password123",
+    "rtspPath": "/h264Preview_01_main",
+    "manufacturer": "reolink",
+    "status": "active",
+    "createdAt": "2025-01-16T00:00:00.000Z"
+  },
+  {
+    "id": "cam_004",
+    "name": "Living Room",
+    "ip": "192.168.1.103",
+    "port": 554,
+    "username": "admin",
+    "password": "password123",
+    "rtspPath": "/axis-media/media.amp",
+    "manufacturer": "axis",
+    "status": "inactive",
+    "createdAt": "2025-01-16T00:00:00.000Z"
+  }
+]

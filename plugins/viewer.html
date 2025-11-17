@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Viewer - IP Camera NVR</title>
+    <link rel="stylesheet" href="css/viewer.css">
+</head>
+<body>
+    <div class="viewer-container">
+        <div class="viewer-header">
+            <h1>Live Camera View</h1>
+            <div class="controls">
+                <select id="layoutSelect">
+                    <option value="2x2">2x2 Grid (4 cameras)</option>
+                    <option value="2x4" selected>2x4 Grid (8 cameras)</option>
+                    <option value="3x3">3x3 Grid (9 cameras)</option>
+                    <option value="1x1">Single Camera</option>
+                </select>
+                <button id="refreshBtn" class="btn-icon" title="Refresh All">
+                    <span>🔄</span>
+                </button>
+                <button id="fullscreenBtn" class="btn-icon" title="Fullscreen">
+                    <span>⛶</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="cameraGrid" class="camera-grid layout-2x4">
+            <!-- Camera cells will be dynamically added here -->
+        </div>
+
+        <div id="noCamera" class="no-camera" style="display: none;">
+            <h2>No Cameras Configured</h2>
+            <p>Please add cameras in the Camera Management page</p>
+        </div>
+    </div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  rtsptoweb:
+    image: ghcr.io/deepch/rtsptoweb:latest
+    container_name: ip-camera-nvr-backend
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./backend/config.json:/config/config.json
+      - ./plugins:/www
+    environment:
+      - TZ=UTC
+    ports:
+      - "8083:8083"
+      - "5541:5541"
+
+  # Optional: Add HTTP server for serving MSX files
+  web-server:
+    image: nginx:alpine
+    container_name: ip-camera-nvr-web
+    restart: unless-stopped
+    volumes:
+      - ./:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"

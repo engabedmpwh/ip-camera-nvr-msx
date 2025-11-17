@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Scanner Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 20px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #45a049;
+        }
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .results {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 6px;
+            min-height: 100px;
+        }
+        .device {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .device-info {
+            flex: 1;
+        }
+        .device-info strong {
+            font-size: 18px;
+            color: #4CAF50;
+        }
+        .device-info small {
+            display: block;
+            margin-top: 5px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #4CAF50;
+        }
+        .status-error {
+            background: #f44336;
+        }
+        .status-warning {
+            background: #ff9800;
+        }
+        .status-info {
+            background: #2196F3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 IP Camera Network Scanner</h1>
+
+        <button id="scanBtn" class="btn">Scan Network for Cameras</button>
+
+        <div id="results" class="results">
+            <p style="color: rgba(255,255,255,0.6);">Click "Scan Network" to start...</p>
+        </div>
+    </div>
+
+    <script>
+        const scanBtn = document.getElementById('scanBtn');
+        const results = document.getElementById('results');
+
+        scanBtn.addEventListener('click', scanNetwork);
+
+        async function scanNetwork() {
+            scanBtn.disabled = true;
+            scanBtn.textContent = 'Scanning...';
+
+            results.innerHTML = '<p class="status status-info">🔍 Scanning network for IP cameras...</p>' +
+                '<p style="font-size: 14px; margin-top: 10px;">This may take 5-10 seconds...</p>';
+
+            try {
+                const response = await fetch('http://localhost:8085/scan');
+                const data = await response.json();
+
+                scanBtn.disabled = false;
+                scanBtn.textContent = 'Scan Network for Cameras';
+
+                if (data.success && data.cameras && data.cameras.length > 0) {
+                    displayResults(data.cameras, data.network);
+                } else {
+                    results.innerHTML = '<p class="status status-warning">⚠ No cameras found</p>' +
+                        '<p style="margin-top: 15px;">Scanned network: <strong>' + (data.network || 'unknown') + '</strong></p>' +
+                        '<p style="font-size: 14px; margin-top: 10px; color: rgba(255,255,255,0.7);">' +
+                        'Make sure cameras are:<br>' +
+                        '• Powered on<br>' +
+                        '• Connected to the same network<br>' +
+                        '• Support ONVIF protocol or have HTTP port open' +
+                        '</p>';
+                }
+            } catch (error) {
+                scanBtn.disabled = false;
+                scanBtn.textContent = 'Scan Network for Cameras';
+
+                results.innerHTML = '<p class="status status-error">❌ Scanner service unavailable</p>' +
+                    '<p style="margin-top: 15px;">Error: ' + error.message + '</p>' +
+                    '<p style="font-size: 14px; margin-top: 10px;">Make sure the scanner is running:<br>' +
+                    '<code>node backend/camera-scanner.js</code></p>';
+            }
+        }
+
+        let foundCameras = [];
+
+        function displayResults(cameras, network) {
+            foundCameras = cameras; // Store for later use
+
+            let html = '<p class="status status-success">✅ Found ' + cameras.length + ' device(s)</p>';
+            html += '<p style="margin: 15px 0;">Network: <strong>' + network + '</strong></p>';
+
+            // Add All Cameras button
+            html += '<button onclick="addAllCameras()" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; width: 100%; margin: 15px 0; font-size: 16px; font-weight: bold;">➕ Add All Cameras</button>';
+
+            html += '<div style="margin-top: 20px;">';
+
+            cameras.forEach((camera, index) => {
+                html += '<div class="device">';
+                html += '<div class="device-info">';
+                html += '<strong>' + camera.ip + '</strong>';
+
+                if (camera.manufacturer && camera.manufacturer !== 'Unknown') {
+                    html += ' <span style="color: #4CAF50;">(' + camera.manufacturer + ')</span>';
+                }
+
+                html += '<small>';
+                if (camera.model && camera.model !== 'Unknown') {
+                    html += 'Model: ' + camera.model + '<br>';
+                }
+                html += 'Port: ' + camera.port + ' | Type: ' + camera.type;
+                html += '</small>';
+                html += '</div>';
+
+                html += '<button onclick="addSingleCamera(' + index + ')" style="background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-right: 5px;">Add</button>';
+                html += '<button onclick="copyIP(\'' + camera.ip + '\')" style="background: #2196F3; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Copy IP</button>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+            html += '<p style="margin-top: 20px; font-size: 14px; color: rgba(255,255,255,0.7);">' +
+                'Click "Add All Cameras" to add all at once, or "Add" individual cameras.<br>' +
+                'Default credentials: admin/admin (you can change later in Camera Manager)' +
+                '</p>';
+
+            results.innerHTML = html;
+        }
+
+        function copyIP(ip) {
+            navigator.clipboard.writeText(ip).then(() => {
+                alert('IP address copied: ' + ip);
+            }).catch(err => {
+                alert('Failed to copy: ' + err);
+            });
+        }
+
+        // Add all found cameras to storage
+        function addAllCameras() {
+            if (foundCameras.length === 0) {
+                alert('No cameras to add!');
+                return;
+            }
+
+            let added = 0;
+            foundCameras.forEach((camera, index) => {
+                if (addCameraToStorage(camera, index + 1)) {
+                    added++;
+                }
+            });
+
+            alert('✅ Added ' + added + ' camera(s)!\n\nDefault credentials: admin/admin\n\nGo to Camera Manager to edit details and add passwords.');
+
+            // Show success message
+            results.innerHTML = '<p class="status status-success">✅ Successfully added ' + added + ' camera(s)</p>' +
+                '<p style="margin-top: 15px;">Cameras saved to browser storage!</p>' +
+                '<p style="margin-top: 10px;">Next steps:</p>' +
+                '<ol style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">' +
+                '<li>Go to <a href="plugins/manager.html" style="color: #4CAF50;">Camera Manager</a></li>' +
+                '<li>Edit each camera to add correct username/password</li>' +
+                '<li>Verify RTSP paths are correct</li>' +
+                '<li>Go to <a href="plugins/viewer.html" style="color: #4CAF50;">Camera Viewer</a> to see live streams</li>' +
+                '</ol>' +
+                '<button onclick="location.href=\'plugins/manager.html\'" style="background: #4CAF50; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin-top: 20px; width: 100%; font-size: 16px;">Open Camera Manager</button>';
+        }
+
+        // Add single camera to storage
+        function addSingleCamera(index) {
+            const camera = foundCameras[index];
+            if (addCameraToStorage(camera, index + 1)) {
+                alert('✅ Camera added: ' + camera.ip + '\n\nGo to Camera Manager to edit details.');
+            }
+        }
+
+        // Helper function to add camera to localStorage
+        function addCameraToStorage(camera, number) {
+            try {
+                // Get existing cameras
+                let cameras = [];
+                const stored = localStorage.getItem('ip_camera_nvr_cameras');
+                if (stored) {
+                    cameras = JSON.parse(stored);
+                }
+
+                // Check if camera already exists
+                const exists = cameras.find(c => c.ip === camera.ip);
+                if (exists) {
+                    console.log('Camera already exists:', camera.ip);
+                    return false;
+                }
+
+                // Generate camera name based on manufacturer or IP
+                let cameraName = 'Camera ' + number;
+                if (camera.manufacturer && camera.manufacturer !== 'Unknown') {
+                    cameraName = camera.manufacturer + ' Camera ' + number;
+                }
+
+                // Get RTSP path based on manufacturer
+                let rtspPath = '/stream1'; // default
+                if (camera.manufacturer) {
+                    const paths = getRtspPaths(camera.manufacturer.toLowerCase());
+                    if (paths && paths.length > 0) {
+                        rtspPath = paths[0];
+                    }
+                }
+
+                // Create camera object
+                const newCamera = {
+                    id: 'cam_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    name: cameraName,
+                    ip: camera.ip,
+                    port: camera.port === 80 ? 554 : camera.port, // Use 554 for RTSP if detected as 80
+                    username: 'admin', // Default username
+                    password: 'admin', // Default password - user should change
+                    rtspPath: rtspPath,
+                    manufacturer: camera.manufacturer !== 'Unknown' ? camera.manufacturer.toLowerCase() : 'generic',
+                    status: 'inactive',
+                    createdAt: new Date().toISOString()
+                };
+
+                // Add to array and save
+                cameras.push(newCamera);
+                localStorage.setItem('ip_camera_nvr_cameras', JSON.stringify(cameras));
+
+                console.log('Camera added:', newCamera);
+                return true;
+
+            } catch (error) {
+                console.error('Error adding camera:', error);
+                alert('Error adding camera: ' + error.message);
+                return false;
+            }
+        }
+
+        // Get RTSP paths for manufacturer
+        function getRtspPaths(manufacturer) {
+            const paths = {
+                hikvision: ['/Streaming/Channels/101', '/h264/ch1/main/av_stream'],
+                dahua: ['/cam/realmonitor?channel=1&subtype=0', '/live/ch00_0'],
+                axis: ['/axis-media/media.amp'],
+                reolink: ['/h264Preview_01_main', '/bcs/channel0_main.bcs'],
+                amcrest: ['/cam/realmonitor?channel=1&subtype=0'],
+                foscam: ['/videoMain', '/11'],
+                vivotek: ['/live.sdp'],
+                generic: ['/stream1', '/live', '/h264']
+            };
+            return paths[manufacturer] || paths.generic;
+        }
+
+        // Auto-check if scanner is available
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('http://localhost:8085/health');
+                const data = await response.json();
+                if (data.status === 'ok') {
+                    console.log('✅ Scanner service is ready');
+                }
+            } catch (error) {
+                results.innerHTML = '<p class="status status-error">❌ Scanner service not running</p>' +
+                    '<p style="margin-top: 15px;">Please start the scanner first:<br>' +
+                    '<code style="background: rgba(0,0,0,0.3); padding: 10px; display: block; margin-top: 10px; border-radius: 4px;">cd C:\\1\\ip-camera-nvr-msx\\backend<br>node camera-scanner.js</code></p>';
+            }
+        });
+    </script>
+</body>
+</html>

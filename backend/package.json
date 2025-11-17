@@ -1,0 +1,17 @@
+{
+  "name": "ip-camera-nvr-sync-api",
+  "version": "1.0.0",
+  "description": "Camera sync API for IP Camera NVR MSX app",
+  "main": "sync-cameras.js",
+  "scripts": {
+    "start": "node sync-cameras.js",
+    "dev": "nodemon sync-cameras.js"
+  },
+  "keywords": ["msx", "ip-camera", "nvr", "rtsp"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+*.log
+.env
+.env.local
+cameras.json
+backend/config.json
+backend/*.db

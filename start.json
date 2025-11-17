@@ -1,0 +1,62 @@
+{
+  "name": "IP Camera NVR",
+  "version": "1.0.0",
+  "parameter": "menu:cameras",
+  "dictionary": "https://msx.benzac.de/locale/en.json",
+  "menu": [
+    {
+      "type": "pages",
+      "id": "cameras",
+      "icon": "videocam",
+      "label": "Camera Viewer",
+      "pages": [
+        {
+          "items": [
+            {
+              "type": "default",
+              "layout": "0,0,4,2",
+              "icon": "grid-on",
+              "label": "8-Camera Grid View",
+              "action": "player:plugins/viewer.html"
+            },
+            {
+              "type": "default",
+              "layout": "0,2,4,2",
+              "icon": "settings-input-antenna",
+              "label": "Manage Cameras",
+              "action": "content:plugins/manager.html"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "pages",
+      "id": "settings",
+      "icon": "settings",
+      "label": "Settings",
+      "pages": [
+        {
+          "items": [
+            {
+              "type": "default",
+              "layout": "0,0,4,2",
+              "icon": "info",
+              "label": "About",
+              "badge": "v1.0.0",
+              "action": "panel:data"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "panels": [
+    {
+      "id": "data",
+      "type": "text",
+      "headline": "IP Camera NVR for MSX",
+      "text": "Version: 1.0.0\n\nA lightweight IP camera viewer for Media Station X.\n\nFeatures:\n• View up to 8 IP cameras simultaneously\n• Support for RTSP/RTMP camera streams\n• Manual camera addition with credentials\n• Network camera discovery\n• Auto-reconnect on stream failure\n\nBackend powered by RTSPtoWeb.\n\nRequirements:\n• RTSPtoWeb server running on port 8083\n• IP cameras with RTSP/RTMP support\n\nFor support and updates, visit:\nhttps://github.com/benzac-de/msx"
+    }
+  ]
+}
